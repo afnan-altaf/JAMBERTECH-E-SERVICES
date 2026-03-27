@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "JamberTech E-SERVICES"
+version = "1.0.0"
+id = "artifacts/jambertech"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23937
+
+[services.development]
+run = "pnpm --filter @workspace/jambertech run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/jambertech", "run", "build" ]
+publicDir = "artifacts/jambertech/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23937"
+BASE_PATH = "/"

@@ -1,0 +1,22 @@
+packages:
+  "framer-motion": "For page transitions, smooth enter animations, and stunning UI micro-interactions"
+  "zustand": "Lightweight global state management for auth and user preferences"
+  "clsx": "Utility for constructing className strings conditionally"
+  "tailwind-merge": "Utility to resolve Tailwind CSS class conflicts"
+  "date-fns": "For formatting order dates elegantly"
+  "@hookform/resolvers": "For integrating Zod validation with forms if needed"
+  "react-hook-form": "For efficient form state management"
+  "zod": "For client-side form validation"
+
+images:
+  - path: "artifacts/jambertech/public/images/auth-bg.png"
+    description: "Abstract dark fintech background, deep navy with glowing subtle electric blue and cyan geometric grids, premium, minimalist, depth of field"
+    aspect_ratio: "16:9"
+  - path: "artifacts/jambertech/public/images/logo-icon.png"
+    description: "Minimalist abstract geometric icon representing a glowing 'J' or node graph in neon cyan and indigo, transparent background, vector style"
+    aspect_ratio: "1:1"
+
+notes:
+  - Using generated hooks from @workspace/api-client-react
+  - Auth token will be stored in localStorage and injected via a global window.fetch interceptor in main.tsx
+  - SMM Panel charge calculation is (sellRate / 1000) * quantity

@@ -1,5 +1,6 @@
 import app from "./app";
 import { logger } from "./lib/logger";
+import { setupCronJobs } from "./lib/cronJobs";
 
 const rawPort = process.env["PORT"];
 
@@ -21,5 +22,8 @@ app.listen(port, (err) => {
     process.exit(1);
   }
 
-  logger.info({ port }, "Server listening");
+  logger.info({ port }, "JamberTech E-SERVICES API server listening");
+
+  // Cron jobs setup karo - service sync har 24 ghante mein chalega
+  setupCronJobs();
 });

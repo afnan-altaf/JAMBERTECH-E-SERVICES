@@ -1,22 +1,30 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: JamberTech E-SERVICES SMM Panel API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: users
+    description: User operations
+  - name: providers
+    description: Provider management (Admin)
+  - name: services
+    description: Service catalog operations
+  - name: orders
+    description: Order management
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +32,407 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterBody"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Email already in use
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /users/balance:
+    patch:
+      operationId: addBalance
+      tags: [users]
+      summary: Add balance to user (Admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddBalanceBody"
+      responses:
+        "200":
+          description: Balance updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List all users (Admin only)
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /providers:
+    get:
+      operationId: listProviders
+      tags: [providers]
+      summary: List all providers (Admin only)
+      responses:
+        "200":
+          description: List of providers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Provider"
+    post:
+      operationId: createProvider
+      tags: [providers]
+      summary: Create a new provider (Admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProviderBody"
+      responses:
+        "201":
+          description: Provider created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Provider"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /providers/{id}:
+    patch:
+      operationId: updateProvider
+      tags: [providers]
+      summary: Update a provider (Admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProviderBody"
+      responses:
+        "200":
+          description: Provider updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Provider"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteProvider
+      tags: [providers]
+      summary: Delete a provider (Admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /providers/sync:
+    post:
+      operationId: syncServices
+      tags: [providers]
+      summary: Trigger service sync from all providers (Admin only)
+      responses:
+        "200":
+          description: Sync result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SyncResult"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /services:
+    get:
+      operationId: listServices
+      tags: [services]
+      summary: List all active services
+      parameters:
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of services
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Service"
+
+  /services/categories:
+    get:
+      operationId: listCategories
+      tags: [services]
+      summary: List unique service categories
+      responses:
+        "200":
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /services/{id}:
+    get:
+      operationId: getService
+      tags: [services]
+      summary: Get a single service
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Service
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Service"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateService
+      tags: [services]
+      summary: Update a service (Admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateServiceBody"
+      responses:
+        "200":
+          description: Service updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Service"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /orders:
+    get:
+      operationId: listOrders
+      tags: [orders]
+      summary: List orders (user sees own, admin sees all)
+      responses:
+        "200":
+          description: List of orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+    post:
+      operationId: createOrder
+      tags: [orders]
+      summary: Place a new order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderBody"
+      responses:
+        "201":
+          description: Order placed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "400":
+          description: Validation or balance error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /orders/{id}:
+    get:
+      operationId: getOrder
+      tags: [orders]
+      summary: Get a single order
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +443,275 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+
+    RegisterBody:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+      required:
+        - name
+        - email
+        - password
+
+    LoginBody:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required:
+        - email
+        - password
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        balance:
+          type: number
+        role:
+          type: string
+          enum: [user, admin]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - email
+        - balance
+        - role
+        - createdAt
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        token:
+          type: string
+      required:
+        - user
+        - token
+
+    AddBalanceBody:
+      type: object
+      properties:
+        userId:
+          type: integer
+        amount:
+          type: number
+      required:
+        - userId
+        - amount
+
+    Provider:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        apiUrl:
+          type: string
+        apiKey:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - apiUrl
+        - apiKey
+        - status
+        - createdAt
+
+    CreateProviderBody:
+      type: object
+      properties:
+        name:
+          type: string
+        apiUrl:
+          type: string
+        apiKey:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive]
+          default: active
+      required:
+        - name
+        - apiUrl
+        - apiKey
+
+    UpdateProviderBody:
+      type: object
+      properties:
+        name:
+          type: string
+        apiUrl:
+          type: string
+        apiKey:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive]
+
+    SyncResult:
+      type: object
+      properties:
+        added:
+          type: integer
+        updated:
+          type: integer
+        deactivated:
+          type: integer
+        errors:
+          type: array
+          items:
+            type: string
+      required:
+        - added
+        - updated
+        - deactivated
+        - errors
+
+    Service:
+      type: object
+      properties:
+        id:
+          type: integer
+        providerServiceId:
+          type: string
+        providerId:
+          type: integer
+        providerName:
+          type: ["string", "null"]
+        name:
+          type: string
+        category:
+          type: string
+        type:
+          type: string
+        originalRate:
+          type: number
+        sellRate:
+          type: number
+        min:
+          type: integer
+        max:
+          type: integer
+        status:
+          type: string
+          enum: [active, inactive]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - providerServiceId
+        - providerId
+        - name
+        - category
+        - type
+        - originalRate
+        - sellRate
+        - min
+        - max
+        - status
+        - createdAt
+
+    UpdateServiceBody:
+      type: object
+      properties:
+        name:
+          type: string
+        category:
+          type: string
+        sellRate:
+          type: number
+        status:
+          type: string
+          enum: [active, inactive]
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        serviceId:
+          type: integer
+        serviceName:
+          type: ["string", "null"]
+        providerOrderId:
+          type: ["string", "null"]
+        link:
+          type: string
+        quantity:
+          type: integer
+        charge:
+          type: number
+        status:
+          type: string
+          enum: [pending, in_progress, completed, partial, canceled]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - serviceId
+        - link
+        - quantity
+        - charge
+        - status
+        - createdAt
+
+    CreateOrderBody:
+      type: object
+      properties:
+        serviceId:
+          type: integer
+        link:
+          type: string
+        quantity:
+          type: integer
+      required:
+        - serviceId
+        - link
+        - quantity

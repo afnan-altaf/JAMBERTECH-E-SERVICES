@@ -6,6 +6,14 @@ import { logger } from "./lib/logger";
 
 const app: Express = express();
 
+// CORS configuration - frontend se requests allow karna
+app.use(
+  cors({
+    origin: true, // Sab origins allow karo development mein
+    credentials: true,
+  })
+);
+
 app.use(
   pinoHttp({
     logger,
@@ -25,7 +33,7 @@ app.use(
     },
   }),
 );
-app.use(cors());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
