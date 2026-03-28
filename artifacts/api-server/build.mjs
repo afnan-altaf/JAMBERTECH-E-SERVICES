@@ -120,19 +120,16 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
     },
   });
 
-  // Vercel serverless entry (exports app without listen - for Vercel deployment)
-  // pino-pretty plugin use nahi karte - serverless mein JSON logs hi chalte hain
-  // api/_handler.mjs mein output karo — underscore se Vercel ise function nahi samjhega
-  // lekin api/index.js is file ko import kar sakta hai (same directory)
-  const apiDir = path.resolve(artifactDir, "../../api");
+  // Vercel serverless entry — directly api/index.js mein CJS format mein build karo
+  // CJS format use karo taake Vercel ise directly load kar sake — no dynamic imports needed
+  // Ye file git mein placeholder hai, build ke time overwrite ho jati hai
+  const apiIndexPath = path.resolve(artifactDir, "../../api/index.js");
   await esbuild({
     entryPoints: [path.resolve(artifactDir, "src/handler.ts")],
     platform: "node",
     bundle: true,
-    format: "esm",
-    outdir: apiDir,
-    entryNames: "_handler",
-    outExtension: { ".js": ".mjs" },
+    format: "cjs",
+    outfile: apiIndexPath,
     logLevel: "info",
     external: [
       "*.node", "sharp", "better-sqlite3", "sqlite3", "canvas", "bcrypt",
@@ -141,16 +138,6 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
       "pino-pretty", "thread-stream",
     ],
     sourcemap: false,
-    banner: {
-      js: `import { createRequire as __bannerCrReq } from 'node:module';
-import __bannerPath from 'node:path';
-import __bannerUrl from 'node:url';
-
-globalThis.require = __bannerCrReq(import.meta.url);
-globalThis.__filename = __bannerUrl.fileURLToPath(import.meta.url);
-globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
-    `,
-    },
   });
 }
 
