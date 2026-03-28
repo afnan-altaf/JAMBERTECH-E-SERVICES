@@ -47,3 +47,10 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Environment Variables - KABHI COMMIT MAT KARNA
+.env
+.env.local
+.env.production
+.env.development
+.env.*.local
