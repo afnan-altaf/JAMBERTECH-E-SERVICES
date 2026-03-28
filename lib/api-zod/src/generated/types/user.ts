@@ -13,5 +13,6 @@ export interface User {
   email: string;
   balance: number;
   role: UserRole;
+  emailVerified: boolean;
   createdAt: Date;
 }

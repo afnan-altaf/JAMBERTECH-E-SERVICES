@@ -29,6 +29,26 @@ export interface LoginBody {
   password: string;
 }
 
+export interface VerifyEmailBody {
+  email: string;
+  otp: string;
+}
+
+export interface ResendOtpBody {
+  email: string;
+}
+
+export interface ForgotPasswordBody {
+  email: string;
+}
+
+export interface ResetPasswordBody {
+  email: string;
+  otp: string;
+  /** @minLength 6 */
+  newPassword: string;
+}
+
 export type UserRole = (typeof UserRole)[keyof typeof UserRole];
 
 export const UserRole = {
@@ -42,6 +62,7 @@ export interface User {
   email: string;
   balance: number;
   role: UserRole;
+  emailVerified: boolean;
   createdAt: string;
 }
 

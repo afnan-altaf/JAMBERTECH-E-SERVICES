@@ -40,9 +40,68 @@ export const LoginResponse = zod.object({
     email: zod.string(),
     balance: zod.number(),
     role: zod.enum(["user", "admin"]),
+    emailVerified: zod.boolean(),
     createdAt: zod.date(),
   }),
   token: zod.string(),
+});
+
+/**
+ * @summary Verify email with OTP
+ */
+export const VerifyEmailBody = zod.object({
+  email: zod.string().email(),
+  otp: zod.string(),
+});
+
+export const VerifyEmailResponse = zod.object({
+  user: zod.object({
+    id: zod.number(),
+    name: zod.string(),
+    email: zod.string(),
+    balance: zod.number(),
+    role: zod.enum(["user", "admin"]),
+    emailVerified: zod.boolean(),
+    createdAt: zod.date(),
+  }),
+  token: zod.string(),
+});
+
+/**
+ * @summary Resend verification OTP
+ */
+export const ResendOtpBody = zod.object({
+  email: zod.string().email(),
+});
+
+export const ResendOtpResponse = zod.object({
+  message: zod.string(),
+});
+
+/**
+ * @summary Request password reset OTP via email
+ */
+export const ForgotPasswordBody = zod.object({
+  email: zod.string().email(),
+});
+
+export const ForgotPasswordResponse = zod.object({
+  message: zod.string(),
+});
+
+/**
+ * @summary Reset password using OTP
+ */
+export const resetPasswordBodyNewPasswordMin = 6;
+
+export const ResetPasswordBody = zod.object({
+  email: zod.string().email(),
+  otp: zod.string(),
+  newPassword: zod.string().min(resetPasswordBodyNewPasswordMin),
+});
+
+export const ResetPasswordResponse = zod.object({
+  message: zod.string(),
 });
 
 /**
@@ -61,6 +120,7 @@ export const GetMeResponse = zod.object({
   email: zod.string(),
   balance: zod.number(),
   role: zod.enum(["user", "admin"]),
+  emailVerified: zod.boolean(),
   createdAt: zod.date(),
 });
 
@@ -78,6 +138,7 @@ export const AddBalanceResponse = zod.object({
   email: zod.string(),
   balance: zod.number(),
   role: zod.enum(["user", "admin"]),
+  emailVerified: zod.boolean(),
   createdAt: zod.date(),
 });
 
@@ -90,6 +151,7 @@ export const ListUsersResponseItem = zod.object({
   email: zod.string(),
   balance: zod.number(),
   role: zod.enum(["user", "admin"]),
+  emailVerified: zod.boolean(),
   createdAt: zod.date(),
 });
 export const ListUsersResponse = zod.array(ListUsersResponseItem);

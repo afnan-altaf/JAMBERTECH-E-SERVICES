@@ -40,7 +40,7 @@ artifacts-monorepo/
 ## Database Models
 
 ### Users
-- id, name, email, password (bcrypt hashed), balance (numeric, default 0), role (user/admin)
+- id, name, email, password (bcrypt hashed), balance (numeric, default 0), role (user/admin), emailVerified (boolean)
 
 ### Providers
 - id, name, apiUrl, apiKey, status (active/inactive)
@@ -56,11 +56,18 @@ artifacts-monorepo/
 ### Orders
 - id, userId, serviceId, providerOrderId, link, quantity, charge, status
 
+### OTPs
+- id, email, code (6-digit), type (email_verification / password_reset), used (boolean), expiresAt (15 min TTL)
+
 ## API Routes
 
 ### Auth
-- POST /api/auth/register - Register new user
-- POST /api/auth/login - Login, returns JWT token
+- POST /api/auth/register - Register new user (sends email OTP, requires verification before login)
+- POST /api/auth/verify-email - Verify OTP, returns JWT token
+- POST /api/auth/resend-otp - Resend verification OTP
+- POST /api/auth/login - Login (only verified emails), returns JWT token
+- POST /api/auth/forgot-password - Send password reset OTP via email
+- POST /api/auth/reset-password - Reset password with OTP
 - POST /api/auth/logout
 - GET /api/auth/me - Get current user (requires Bearer token)
 

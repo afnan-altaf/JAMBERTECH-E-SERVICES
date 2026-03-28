@@ -1,5 +1,5 @@
 // Users table - JamberTech panel ke users store karte hain
-import { pgTable, text, serial, timestamp, numeric, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, numeric, pgEnum, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -15,6 +15,8 @@ export const usersTable = pgTable("users", {
   // Balance default 0 se shuru hoga
   balance: numeric("balance", { precision: 10, scale: 4 }).notNull().default("0"),
   role: userRoleEnum("role").notNull().default("user"),
+  // Email verified hai ya nahi - OTP se verify hone ke baad true hoga
+  emailVerified: boolean("email_verified").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

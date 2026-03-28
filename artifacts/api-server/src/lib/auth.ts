@@ -40,6 +40,7 @@ declare global {
         email: string;
         balance: string;
         role: string;
+        emailVerified: boolean;
       };
     }
   }
@@ -76,6 +77,7 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
       email: user.email,
       balance: user.balance,
       role: user.role,
+      emailVerified: user.emailVerified,
     };
 
     next();
