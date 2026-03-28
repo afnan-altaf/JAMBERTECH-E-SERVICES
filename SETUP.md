@@ -1,10 +1,62 @@
 # JamberTech E-SERVICES — Setup Guide
 
-Ye guide tumhe apne server ya VPS par is project ko host karne mein help karega.
+Ye guide tumhe Vercel par ya apne VPS par is project ko host karne mein help karega.
 
 ---
 
-## Requirements
+## Vercel par Deploy karo (Recommended)
+
+### Step A — Database banana (Neon.tech — Free)
+
+1. [neon.tech](https://neon.tech) par free account banao
+2. New project banao → Connection string copy karo (`postgresql://...`)
+3. Ye `DATABASE_URL` ke liye use hoga
+
+### Step B — Vercel par project import karo
+
+1. [vercel.com](https://vercel.com) par login karo
+2. **New Project** > **Import Git Repository** > GitHub repo select karo
+3. **Framework Preset**: Other
+4. **Root Directory**: `.` (root)
+5. **Build Command**: `pnpm run vercel-build` (already `vercel.json` mein set hai)
+6. **Output Directory**: `artifacts/jambertech/dist/public`
+
+### Step C — Environment Variables set karo (Vercel Dashboard mein)
+
+Project import karne ke baad **Settings → Environment Variables** mein ye add karo:
+
+| Variable | Value |
+|----------|-------|
+| `DATABASE_URL` | Neon.tech PostgreSQL URL |
+| `JWT_SECRET` | `openssl rand -base64 32` se generate karo |
+| `RESEND_API_KEY` | [resend.com](https://resend.com) se lo |
+| `FROM_EMAIL` | `noreply@yourdomain.com` |
+| `NODE_ENV` | `production` |
+
+### Step D — Deploy!
+
+Vercel automatically build aur deploy karega. Pehla deploy 2-3 minute le sakta hai.
+
+### Step E — Database tables banana
+
+Deploy hone ke baad, local machine se ya Neon dashboard mein ye command chalao:
+
+```bash
+DATABASE_URL="postgresql://..." pnpm --filter @workspace/db run push
+```
+
+### Step F — Admin account banana
+
+Neon dashboard mein SQL Editor kholo aur ye chalao:
+
+```sql
+UPDATE users SET role = 'admin', email_verified = true 
+WHERE email = 'tumhara@email.com';
+```
+
+---
+
+## VPS/Server par Deploy karo (Alternative)
 
 - **Node.js** v20 ya usse upar
 - **pnpm** v9+ (`npm install -g pnpm`)

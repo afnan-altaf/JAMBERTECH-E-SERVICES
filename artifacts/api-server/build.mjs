@@ -14,6 +14,7 @@ async function buildAll() {
   const distDir = path.resolve(artifactDir, "dist");
   await rm(distDir, { recursive: true, force: true });
 
+  // Main server entry (calls app.listen - for traditional server hosting)
   await esbuild({
     entryPoints: [path.resolve(artifactDir, "src/index.ts")],
     platform: "node",
@@ -107,6 +108,35 @@ async function buildAll() {
       esbuildPluginPino({ transports: ["pino-pretty"] })
     ],
     // Make sure packages that are cjs only (e.g. express) but are bundled continue to work in our esm output file
+    banner: {
+      js: `import { createRequire as __bannerCrReq } from 'node:module';
+import __bannerPath from 'node:path';
+import __bannerUrl from 'node:url';
+
+globalThis.require = __bannerCrReq(import.meta.url);
+globalThis.__filename = __bannerUrl.fileURLToPath(import.meta.url);
+globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
+    `,
+    },
+  });
+
+  // Vercel serverless entry (exports app without listen - for Vercel deployment)
+  // pino-pretty plugin use nahi karte - serverless mein JSON logs hi chalte hain
+  await esbuild({
+    entryPoints: [path.resolve(artifactDir, "src/handler.ts")],
+    platform: "node",
+    bundle: true,
+    format: "esm",
+    outdir: path.resolve(distDir, "vercel"),
+    outExtension: { ".js": ".mjs" },
+    logLevel: "info",
+    external: [
+      "*.node", "sharp", "better-sqlite3", "sqlite3", "canvas", "bcrypt",
+      "argon2", "fsevents", "re2", "farmhash", "bufferutil", "utf-8-validate",
+      "pg-native", "oracledb", "mongodb-client-encryption", "ssh2",
+      "pino-pretty", "thread-stream",
+    ],
+    sourcemap: false,
     banner: {
       js: `import { createRequire as __bannerCrReq } from 'node:module';
 import __bannerPath from 'node:path';
