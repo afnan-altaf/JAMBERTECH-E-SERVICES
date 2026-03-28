@@ -9,16 +9,29 @@ import {
   ShieldCheck, KeyRound, RefreshCw, ChevronLeft
 } from "lucide-react";
 
-const API = import.meta.env.BASE_URL.replace(/\/$/, "");
-
-// Har API call ke liye helper
+// Har API call ke liye helper — window.location.origin use karo absolute URL ke liye
 async function apiPost(path: string, body: object) {
-  const res = await fetch(`${API}/api${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  const data = await res.json();
+  let res: Response;
+  try {
+    res = await fetch(`/api${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  } catch (networkErr) {
+    console.error("Network error:", networkErr);
+    throw { error: "Network error. Please check your connection and try again." };
+  }
+
+  const text = await res.text();
+  let data: any;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    console.error("Non-JSON response:", res.status, text.slice(0, 300));
+    throw { error: `Server error (${res.status}). Please try again.` };
+  }
+
   if (!res.ok) throw data;
   return data;
 }
