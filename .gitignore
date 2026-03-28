@@ -54,3 +54,6 @@ Thumbs.db
 .env.production
 .env.development
 .env.*.local
+
+# Vercel handler build artifact
+api/_handler.mjs

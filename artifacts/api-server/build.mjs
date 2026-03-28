@@ -122,12 +122,16 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
 
   // Vercel serverless entry (exports app without listen - for Vercel deployment)
   // pino-pretty plugin use nahi karte - serverless mein JSON logs hi chalte hain
+  // api/_handler.mjs mein output karo — underscore se Vercel ise function nahi samjhega
+  // lekin api/index.js is file ko import kar sakta hai (same directory)
+  const apiDir = path.resolve(artifactDir, "../../api");
   await esbuild({
     entryPoints: [path.resolve(artifactDir, "src/handler.ts")],
     platform: "node",
     bundle: true,
     format: "esm",
-    outdir: path.resolve(distDir, "vercel"),
+    outdir: apiDir,
+    entryNames: "_handler",
     outExtension: { ".js": ".mjs" },
     logLevel: "info",
     external: [
